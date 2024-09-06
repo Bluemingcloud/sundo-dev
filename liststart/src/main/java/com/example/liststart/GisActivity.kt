@@ -3,7 +3,10 @@ package com.example.liststart
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -27,7 +30,9 @@ class GisActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     lateinit var providerClient: FusedLocationProviderClient
     lateinit var apiClient: GoogleApiClient
     private var googleMap: GoogleMap? = null
-    private var currentCenter: LatLng? = null // 현재 지도 중앙의 위치를 저장
+    private var currentCenter: LatLng? = null
+    private lateinit var centerMarkerPreview: ImageView // 중앙에 고정된 미리보기 마커
+    private var isMarkerPreviewVisible = false // 미리보기 마커의 상태를 추적
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +48,7 @@ class GisActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
             }
         }
 
+        // 지도 프래그먼트 초기화
         (supportFragmentManager.findFragmentById(R.id.mapView) as SupportMapFragment).getMapAsync(this)
 
         providerClient = LocationServices.getFusedLocationProviderClient(this)
@@ -52,6 +58,7 @@ class GisActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
             .addOnConnectionFailedListener(this)
             .build()
 
+        // 권한 요청 처리
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(
@@ -61,8 +68,20 @@ class GisActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
             apiClient.connect()
         }
 
+        // 중앙에 고정된 미리보기 마커 설정
+        centerMarkerPreview = findViewById(R.id.centerMarkerPreview)
+        centerMarkerPreview.visibility = View.GONE // 초기에는 숨겨진 상태로 시작
+
+        // selctloti 레이아웃 클릭 이벤트 처리
+        val selctlotiLayout = findViewById<LinearLayout>(R.id.selctloti)
+        selctlotiLayout.setOnClickListener {
+            // 미리보기 마커의 가시성을 토글
+            isMarkerPreviewVisible = !isMarkerPreviewVisible
+            centerMarkerPreview.visibility = if (isMarkerPreviewVisible) View.VISIBLE else View.GONE
+        }
+
         // 마커 추가 버튼 설정
-        val addMarkerButton = findViewById<ImageButton>(R.id.rightButton) // 마커 추가 버튼에 적절한 ID 사용
+        val addMarkerButton = findViewById<ImageButton>(R.id.rightButton)
         addMarkerButton.setOnClickListener {
             currentCenter?.let { center ->
                 addMarkerAtLocation(center.latitude, center.longitude, "선택한 위치")
@@ -117,15 +136,9 @@ class GisActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     override fun onMapReady(map: GoogleMap?) {
         googleMap = map
 
-        // 지도 중앙에 고정된 마커를 위한 이미지 설정
+        // 지도 중심의 위치를 업데이트하는 리스너
         googleMap?.setOnCameraIdleListener {
-            // 지도 중심의 위치 업데이트
             currentCenter = googleMap?.cameraPosition?.target
-        }
-
-        // 지도에서 이동 시 현재 위치를 따라가는 리스너
-        googleMap?.setOnCameraMoveListener {
-            // 필요한 경우, 현재 지도의 중심 좌표를 표시할 수 있습니다.
         }
     }
 }
