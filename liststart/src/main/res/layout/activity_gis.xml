@@ -43,7 +43,7 @@
             android:layout_width='250dp'
             android:layout_height="40dp"
             android:layout_centerInParent="true"
-            android:text="가산 해상풍력단지"
+            android:text="@string/title_default"
             android:textAlignment="center"
             android:textSize="16sp"
             android:textColor="#007AFF"

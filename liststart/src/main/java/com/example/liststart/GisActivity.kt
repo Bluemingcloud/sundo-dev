@@ -39,6 +39,13 @@ class GisActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gis)
 
+        // 전달된 제목 데이터를 받음
+        val title = intent.getStringExtra("title") ?: "이름 없음"
+
+        // TextView를 찾아서 텍스트를 설정
+        val centerTextView = findViewById<TextView>(R.id.centerTextView)
+
+        centerTextView.text = title
         val requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) {
@@ -112,21 +119,32 @@ class GisActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     }
 
     override fun onConnected(p0: Bundle?) {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
-            providerClient.lastLocation
-                .addOnSuccessListener(
-                    this@GisActivity,
-                    OnSuccessListener<Location> { location ->
-                        location?.let {
-                            val latitude = it.latitude
-                            val longitude = it.longitude
-                            moveMap(latitude, longitude)
+
+        val lat = intent.getDoubleExtra("lat",0.0)
+        val long = intent.getDoubleExtra("long", 0.0)
+
+        if(lat == 0.0 && long == 0.0) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+                providerClient.lastLocation
+                    .addOnSuccessListener(
+                        this@GisActivity,
+                        OnSuccessListener<Location> { location ->
+                            location?.let {
+                                val latitude = it.latitude
+                                val longitude = it.longitude
+                                moveMap(latitude, longitude)
+                            }
                         }
-                    }
-                )
-            apiClient.disconnect()
+                    )
+
+            }
+        }   else {
+            moveMap(lat, long)
         }
+
+        apiClient.disconnect()
+
     }
 
     override fun onConnectionSuspended(p0: Int) {

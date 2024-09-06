@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">liststart</string>
+
+    <string name="title_default">이름 없음</string>
+    <string name="search_hint">사업체 검색</string>
 </resources>
