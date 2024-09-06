@@ -4,9 +4,9 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +32,7 @@ class GisActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     private var googleMap: GoogleMap? = null
     private var currentCenter: LatLng? = null
     private lateinit var centerMarkerPreview: ImageView // 중앙에 고정된 미리보기 마커
+    private lateinit var selectLocationTextView: TextView // 좌표 선택 텍스트뷰
     private var isMarkerPreviewVisible = false // 미리보기 마커의 상태를 추적
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,20 +69,23 @@ class GisActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
             apiClient.connect()
         }
 
-        // 중앙에 고정된 미리보기 마커 설정
+        // 중앙에 고정된 미리보기 마커와 텍스트뷰 설정
         centerMarkerPreview = findViewById(R.id.centerMarkerPreview)
+        selectLocationTextView = findViewById(R.id.selectLocationTextView)
         centerMarkerPreview.visibility = View.GONE // 초기에는 숨겨진 상태로 시작
+        selectLocationTextView.visibility = View.GONE // 초기에는 숨겨진 상태로 시작
 
         // selctloti 레이아웃 클릭 이벤트 처리
         val selctlotiLayout = findViewById<LinearLayout>(R.id.selctloti)
         selctlotiLayout.setOnClickListener {
-            // 미리보기 마커의 가시성을 토글
+            // 미리보기 마커와 텍스트뷰의 가시성을 토글
             isMarkerPreviewVisible = !isMarkerPreviewVisible
             centerMarkerPreview.visibility = if (isMarkerPreviewVisible) View.VISIBLE else View.GONE
+            selectLocationTextView.visibility = if (isMarkerPreviewVisible) View.VISIBLE else View.GONE
         }
 
         // 마커 추가 버튼 설정
-        val addMarkerButton = findViewById<ImageButton>(R.id.rightButton)
+        val addMarkerButton = findViewById<TextView>(R.id.selectLocationTextView)
         addMarkerButton.setOnClickListener {
             currentCenter?.let { center ->
                 addMarkerAtLocation(center.latitude, center.longitude, "선택한 위치")
