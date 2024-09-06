@@ -1,0 +1,5 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#FF6200EE"/> <!-- 버튼 색상 -->
+    <corners android:radius="0dp"/> <!-- 모서리를 네모나게 설정 -->
+    <stroke android:width="2dp" android:color="#000000"/> <!-- 테두리 설정 (선택 사항) -->
+</shape>
