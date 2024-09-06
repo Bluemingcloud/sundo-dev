@@ -29,7 +29,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/textname"
-            android:src="@drawable/modify"
+            android:src="@drawable/mypin"
 
             android:layout_alignParentStart="true"
             android:contentDescription="Left Button"
@@ -56,7 +56,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/textname"
-            android:src="@drawable/mypin"
+            android:src="@drawable/modify"
             android:layout_alignParentEnd="true"
             android:contentDescription="Right Button" />
 
@@ -64,6 +64,20 @@
 
 
     <!-- Button on top of the Map -->
+    <ImageButton
+        android:id="@+id/controlLine"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:background="@drawable/textname"
+        android:contentDescription="Left Button"
+        android:src="@drawable/alert"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="120dp"
+        android:scaleType="centerCrop"
+        android:padding="3dp"
+        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -111,12 +125,12 @@
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/input" /> <!-- 아이콘 리소스를 적절히 변경 -->
+                android:src="@drawable/bslist" /> <!-- 아이콘 리소스를 적절히 변경 -->
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="좌표 입력"
+                android:text="사업지 목록"
                 android:textColor="#007AFF"
                 android:textSize="14sp" />
 
@@ -157,12 +171,12 @@
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/alert" /> <!-- 아이콘 리소스를 적절히 변경 -->
+                android:src="@drawable/save" /> <!-- 아이콘 리소스를 적절히 변경 -->
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="규제 구역"
+                android:text="저장 하기"
                 android:textColor="#007AFF"
                 android:textSize="14sp" />
 
