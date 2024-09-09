@@ -10,13 +10,20 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.liststart.databinding.CustomDialogBinding
+import com.example.liststart.databinding.DeleteDialogBinding
 
 const val TAG = "myLog"
 
@@ -26,10 +33,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var itemList: MutableList<Item>
     private lateinit var itemAdapter: ItemAdapter
     private var isVisible = false
+    private lateinit var searchEditText: EditText // 검색 editText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val rootLayout = findViewById<LinearLayout>(R.id.rootLayout)
 
         // 예시 데이터 생성 및 어댑터 설정
         val exampleList = mutableListOf(
@@ -60,8 +70,10 @@ class MainActivity : AppCompatActivity() {
             itemAdapter.filterItem(target)
         }
 
+        // EditText 초기화
+        searchEditText = findViewById(R.id.searchEditText)
+
         // 검색어 입력시 자동 필터링
-        val searchEditText = findViewById<EditText>(R.id.searchEditText)
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val query = s.toString()
@@ -72,6 +84,23 @@ class MainActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
+        setupUI(rootLayout)
+
+        // 검색 포커스 밖에서 키보드 숨김처리
+        searchEditText.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                // 키보드 숨기기
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken, 0)
+            }
+        }
+
+        // 검색 버튼 클릭 시 포커스 해제 및 키보드 숨기기
+        searchButton.setOnClickListener {
+            searchEditText.clearFocus()
+            hideKeyboard()
+        }
+
         // 추가 버튼 클릭 리스너
         val addButton = findViewById<ImageButton>(R.id.addButton)
         addButton.setOnClickListener {
@@ -81,11 +110,38 @@ class MainActivity : AppCompatActivity() {
         // 삭제 버튼 클릭 시 체크박스가 보이면 삭제, 아니면 체크박스 표시
         val deleteButton = findViewById<ImageButton>(R.id.deleteButton)
         deleteButton.setOnClickListener {
-            if (isVisible) itemAdapter.deleteCheckedItems() // 체크된 항목 삭제
+            if (isVisible) {
+                handleDeleteBtnClick()
+            }
             toggleCheckBoxVisibility()
         }
     }
 
+    // 키보드 숨김 처리
+    private fun hideKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(searchEditText.windowToken, 0)
+    }
+
+    // 포커스 처리
+    private fun setupUI(view: View) {
+        // EditText가 아닌 영역을 클릭하면 키보드를 숨기고 포커스를 해제합니다.
+        if (view !is EditText) {
+            view.setOnTouchListener { _, _ ->
+                hideKeyboard()
+                searchEditText.clearFocus()
+                false
+            }
+        }
+
+        // 이 뷰의 자식들에도 동일한 동작을 적용합니다.
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                val innerView = view.getChildAt(i)
+                setupUI(innerView)
+            }
+        }
+    }
 
     private fun toggleCheckBoxVisibility() {
         isVisible = !isVisible
@@ -135,6 +191,34 @@ class MainActivity : AppCompatActivity() {
 
         customDialog.show()
     }
+
+    private fun handleDeleteBtnClick() {
+
+        if(itemAdapter.isAnyChecked()) {
+            val deleteDialog = Dialog(this, R.style.CustomDialogTheme)
+            val dialogBinding = DeleteDialogBinding.inflate(layoutInflater)
+            dialogBinding.deleteItem.text = itemAdapter.getCheckedItemTitle()
+            deleteDialog.setContentView(dialogBinding.root)
+            dialogResize(this, deleteDialog, 0.9f)
+
+            dialogBinding.dialogCancel.setOnClickListener {
+                itemAdapter.changeIsCheckedToDefault()
+                deleteDialog.dismiss()
+            }
+
+            dialogBinding.dialogConfirm.setOnClickListener {
+                itemAdapter.deleteCheckedItems() // 체크된 항목 삭제
+                searchEditText.text.clear() // 검색 입력 초기화
+                deleteDialog.dismiss()
+            }
+
+            deleteDialog.show()
+        } else {
+            return
+        }
+
+    }
+
 
     private fun dialogResize(context: Context, dialog: Dialog, width: Float, height: Float = 0f) {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager

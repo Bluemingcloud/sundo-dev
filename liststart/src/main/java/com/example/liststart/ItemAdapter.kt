@@ -76,12 +76,14 @@ class ItemAdapter(
 
     // 체크된 아이템 삭제
     fun deleteCheckedItems() {
-        itemList = itemList.filter { !it.isChecked }.toMutableList() // 체크되지 않은 항목만 유지
+        originalItemList = originalItemList.filter { !it.isChecked }.toMutableList() // 체크되지 않은 항목만 유지
+        itemList = originalItemList
         notifyDataSetChanged() // 리스트 갱신
     }
 
     fun addItem(data: Item) {
-        itemList.add(data)
+        originalItemList.add(data)
+        itemList = originalItemList
         notifyItemInserted(itemList.size - 1)
     }
 
@@ -94,5 +96,25 @@ class ItemAdapter(
         }
         notifyDataSetChanged()
     }
-}
+
+    // 체크 확인
+    fun isAnyChecked(): Boolean {
+        return !itemList.none { it.isChecked }
+    }
+
+    // 체크된 항목 title 불러오기
+    fun getCheckedItemTitle(): String {
+
+        // 체크된 항목들의 타이틀을 리스트로 가져오기
+        val checkedItems = itemList.filter { it.isChecked }.map { it.title }
+        val size = checkedItems.size
+
+        return if(size > 3) "선택된 사업 ${size}개" else checkedItems.joinToString("\n")
+    }
+
+    fun changeIsCheckedToDefault() {
+        itemList.forEach { if(it.isChecked) it.isChecked = false }
+        notifyDataSetChanged()
+    }
+ }
 
