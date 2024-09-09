@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
         // 리사이클러뷰 설정
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this) 
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
         // 예시 데이터 생성 및 어댑터 설정
         val exampleList = listOf(
@@ -64,7 +64,4 @@ class MainActivity : AppCompatActivity() {
         intent.putExtras(bundle)
         startActivity(intent)
     }
-
-
-
 }
