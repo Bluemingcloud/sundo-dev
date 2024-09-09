@@ -1,4 +1,5 @@
 package com.example.liststart
+
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
@@ -8,11 +9,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-// 데이터 클래스 정의 (예시)
-
 class ItemAdapter(
-    private val itemList: List<Item>,
-    private var isVisible: Boolean, // 상태를 var로 변경
+    private var itemList: MutableList<Item>,
+    private var isVisible: Boolean,
     private val func: (data: Item) -> Unit
 ) : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
 
@@ -41,22 +40,47 @@ class ItemAdapter(
         holder.titleText.text = item.title
         holder.dateText.text = item.date
         holder.profileImage.setImageResource(item.profileImage)
+        holder.checkBox.setImageResource(if (item.isChecked) R.drawable.ic_checkbox_checked else R.drawable.ic_checkbox)
 
-        // isCheckedVisible에 따라 체크박스 visibility 변경
+        // 체크박스 visibility 변경
         holder.checkBox.visibility = if (isVisible) View.VISIBLE else View.GONE
 
         // 아이템 클릭 이벤트 설정
         holder.itemRoot.setOnClickListener {
             if (!isVisible) func(item)
+            else {
+                item.isChecked = !item.isChecked
+                val checkboxImage = if(item.isChecked) R.drawable.ic_checkbox_checked else R.drawable.ic_checkbox
+                holder.checkBox.setImageResource(checkboxImage)
+            }
+        }
+
+        holder.checkBox.setOnClickListener {
+            if(isVisible) {
+                item.isChecked = !item.isChecked
+                val checkboxImage = if(item.isChecked) R.drawable.ic_checkbox_checked else R.drawable.ic_checkbox
+                holder.checkBox.setImageResource(checkboxImage)
+            }
         }
     }
 
     // 아이템 개수 반환
     override fun getItemCount() = itemList.size
 
-    @SuppressLint("NotifyDataSetChanged")
     fun updateVisibility(visible: Boolean) {
         this.isVisible = visible
         notifyDataSetChanged() // 데이터 갱신
     }
+
+    // 체크된 아이템 삭제
+    fun deleteCheckedItems() {
+        itemList = itemList.filter { !it.isChecked }.toMutableList() // 체크되지 않은 항목만 유지
+        notifyDataSetChanged() // 리스트 갱신
+    }
+
+    fun addItem(data: Item) {
+        itemList.add(data)
+        notifyItemInserted(itemList.size - 1)
+    }
 }
+

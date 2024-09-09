@@ -9,11 +9,8 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.liststart.databinding.CustomDialogBinding
@@ -48,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         // itemAdapter 초기화
-        itemAdapter = ItemAdapter(itemList, isVisible) { item -> handleClick(item) }
+        itemAdapter = ItemAdapter(itemList, isVisible, { item -> handleClick(item) })
 
         // RecyclerView에 어댑터 설정
         recyclerView.adapter = itemAdapter
@@ -66,18 +63,23 @@ class MainActivity : AppCompatActivity() {
             handleAddBtnClick()
         }
 
-        // 버튼 클릭 시 체크박스 보이기
-        val deleteButton = findViewById<ImageButton>(R.id.deleteButton) // 삭제버튼 버튼
+        // 삭제 버튼 클릭 시 체크박스가 보이면 삭제, 아니면 체크박스 표시
+        val deleteButton = findViewById<ImageButton>(R.id.deleteButton)
         deleteButton.setOnClickListener {
-            toggleCheckBoxVisibility()
+            if (isVisible) {
+                itemAdapter.deleteCheckedItems() // 체크된 항목 삭제
+                toggleCheckBoxVisibility()
+            } else {
+                toggleCheckBoxVisibility() // 체크박스 보이게 하기
+            }
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+
     private fun toggleCheckBoxVisibility() {
         isVisible = !isVisible
-        // 쓰레기통 이미지 버튼을 다른 모양으로 변경
         val deleteButton = findViewById<ImageButton>(R.id.deleteButton)
+
         if (isVisible) {
             deleteButton.setImageResource(R.drawable.ic_check) // 새로운 이미지로 변경
         } else {
@@ -99,25 +101,17 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun handleClickDeleteCheckbox() {
-
-    }
-
     private fun handleAddBtnClick() {
-        val customDialog = Dialog(this, R.style.CustomDialogTheme) // activity의 컨텍스트
-        val dialogBinding = CustomDialogBinding.inflate(layoutInflater) //커스텀 다이어로그 뷰
-        customDialog.setContentView(dialogBinding.root) //바인딩
+        val customDialog = Dialog(this, R.style.CustomDialogTheme)
+        val dialogBinding = CustomDialogBinding.inflate(layoutInflater)
+        customDialog.setContentView(dialogBinding.root)
         dialogResize(this, customDialog, 0.9f)
 
-        //customDialog.setCanceledOnTouchOutside(false) // 알림바깥을 누르더라도 꺼지지 않음
-        //customDialog.setCancelable(false) // 다이어로그 상태에서 뒤로가기를 막음
-
-        //다이얼로그 view안에서 이벤트
-        dialogBinding.dialogCancel.setOnClickListener { // 취소하기
+        dialogBinding.dialogCancel.setOnClickListener {
             customDialog.dismiss()
         }
 
-        dialogBinding.dialogConfirm.setOnClickListener { // 추가하기
+        dialogBinding.dialogConfirm.setOnClickListener {
             val title = dialogBinding.addEditText.text.toString()
 
             if (title.isBlank()) {
@@ -128,37 +122,28 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        customDialog.show() //보이기
+        customDialog.show()
     }
 
-    private fun dialogResize(context: Context, dialog: Dialog, width: Float, height: Float = 0f){
+    private fun dialogResize(context: Context, dialog: Dialog, width: Float, height: Float = 0f) {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-
-        if (Build.VERSION.SDK_INT < 30){
-
+        val size = if (Build.VERSION.SDK_INT < 30) {
             val display = windowManager.defaultDisplay
-
-            val size = Point()
-            display.getSize(size)
-            val window = dialog.window
-
-            val x = (size.x * width).toInt()
-            val y = if(height != 0f) (size.y * height).toInt() else WindowManager.LayoutParams.WRAP_CONTENT
-            window?.setLayout(x, y)
-
-        }else{
-            val rect = windowManager.currentWindowMetrics.bounds
-
-            val window = dialog.window
-            val x = (rect.width() * width).toInt()
-            val y = if(height != 0f) (rect.height() * height).toInt() else WindowManager.LayoutParams.WRAP_CONTENT
-            window?.setLayout(x, y)
+            val point = Point()
+            display.getSize(point)
+            point
+        } else {
+            windowManager.currentWindowMetrics.bounds.let { Point(it.width(), it.height()) }
         }
+
+        dialog.window?.setLayout(
+            (size.x * width).toInt(),
+            if (height != 0f) (size.y * height).toInt() else WindowManager.LayoutParams.WRAP_CONTENT
+        )
     }
 
     private fun addItem(title: String, date: String) {
         val item = Item(title, date)
-        itemList.add(item)
-        itemAdapter.notifyItemInserted(itemList.size - 1) // 마지막에 아이템 추가
+        itemAdapter.addItem(item)
     }
 }
