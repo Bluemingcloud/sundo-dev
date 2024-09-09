@@ -107,6 +107,7 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
             )
         } else {
             apiClient.connect()
+        }
 
             // 규제구역 버튼 처리
             val controlLineButton = findViewById<ImageButton>(R.id.controllLine)
@@ -163,19 +164,25 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         }
     }
 
-    override fun onMapReady(map: GoogleMap?) {
-        googleMap = map
+        // '지정하기' 버튼 클릭 이벤트 설정
+        val selectLocationButton = findViewById<TextView>(R.id.selectLocationTextView)
+        selectLocationButton.setOnClickListener {
+            val currentCenter = googleMap?.cameraPosition?.target
 
-        // 지도 이동: 전달된 사업 좌표로 이동
-        if (lat != 0.0 && long != 0.0) {
-            val location = LatLng(lat, long)
-            val zoomLevel = 15f // 원하는 줌 레벨 설정
-            googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(location, zoomLevel))
+
+            if (currentCenter != null) {
+                // 중심 좌표에 마커 추가
+                addMarkerAtLocation(currentCenter.latitude, currentCenter.longitude, "선택된 위치")
+                Toast.makeText(this, "마커가 추가되었습니다: ${currentCenter.latitude}, ${currentCenter.longitude}", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
+            }
 
             // 마커 추가
             googleMap?.addMarker(
                 MarkerOptions().position(location).title("사업 위치")
             )
+
         }
 
         // 지도 중심 위치 업데이트 리스너
@@ -204,6 +211,42 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
             Toast.makeText(this, "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
         }
     }
+
+
+    override fun onMapReady(map: GoogleMap?) {
+        googleMap = map
+
+        // 지도 이동: 전달된 사업 좌표로 이동
+        if (lat != 0.0 && long != 0.0) {
+            val location = LatLng(lat, long)
+            val zoomLevel = 15f // 원하는 줌 레벨 설정
+            googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(location, zoomLevel))
+
+            // 마커 추가
+            googleMap?.addMarker(
+                MarkerOptions().position(location).title("사업 위치")
+            )
+        }
+
+        // 지도 중심 위치 업데이트 리스너
+        googleMap?.setOnCameraIdleListener {
+            currentCenter = googleMap?.cameraPosition?.target
+        }
+    }
+
+    private fun moveToCurrentLocation() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+            providerClient.lastLocation.addOnSuccessListener(this, OnSuccessListener<Location> { location ->
+                if (location != null) {
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+                    moveMap(latitude, longitude)
+                    addMarkerAtLocation(latitude, longitude, "현재 위치", BitmapDescriptorFactory.HUE_BLUE)
+                } else {
+                    Toast.makeText(this, "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
+            })
 
     private fun moveMap(latitude: Double, longitude: Double) {
         val latLng = LatLng(latitude, longitude)
@@ -239,19 +282,44 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
                     }
                 })
             }
+
         } else {
             // 전달된 좌표로 지도 이동
             moveMap(lat, long)
         }
     }
 
+
+    private fun moveMap(latitude: Double, longitude: Double) {
+        val latLng = LatLng(latitude, longitude)
+        googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+    }
+
+    private fun addMarkerAtLocation(latitude: Double, longitude: Double, title: String, markerColor: Float = BitmapDescriptorFactory.HUE_RED) {
+        val latLng = LatLng(latitude, longitude)
+        val markerOption = MarkerOptions()
+            .position(latLng)
+            .title(title)
+            .icon(BitmapDescriptorFactory.defaultMarker(markerColor)) // 기본 마커 색상 설정
+        googleMap?.addMarker(markerOption)
+    }
+
+    override fun onConnected(p0: Bundle?) {
+        val lat = intent.getDoubleExtra("lat", 0.0)
+        val long = intent.getDoubleExtra("long", 0.0)
+
+        if (lat == 0.0 && long == 0.0) {
+            moveToCurrentLocation()
+        } else {
+            moveMap(lat, long)
+        }
+    }
+
     override fun onConnectionSuspended(p0: Int) {
-        // 연결이 일시 중단되었을 때 처리
         Log.d("GisActivity", "Google API 연결 일시 중단됨.")
     }
 
     override fun onConnectionFailed(connectionResult: ConnectionResult) {
-        // 연결 실패 처리
         Toast.makeText(this, "Google API 연결 실패: ${connectionResult.errorMessage}", Toast.LENGTH_LONG).show()
     }
 
@@ -273,7 +341,10 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
     }
 
     private fun loadDevelopmentRestrictedAreas() {
-        val url = "https://openapi.gg.go.kr/DevelopRestrictionArea?KEY=apikey&Type=json&pIndex=1&pSize=100"
+        // 여기서 원래 사용하고 있던 API의 URL을 설정합니다.
+        val apiKey = "05C26CB0-9905-39AC-8E59-423EE652CA06"  // 사용자의 API 키 입력
+        val url = "https://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_UD801&key=$apiKey&geomFilter=BOX($long,$lat,${long + 1},${lat + 1})&format=json&size=100"
+
         DownloadTask().execute(url)
     }
 
@@ -287,6 +358,7 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         override fun doInBackground(vararg urls: String?): String {
             val url = urls[0]
             val result = StringBuilder()
+
 
             try {
                 val conn = URL(url).openConnection() as HttpURLConnection
@@ -312,24 +384,33 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
 
             result?.let {
                 val jsonObject = JSONObject(it)
-                val resultObject = jsonObject.getJSONObject("DevelopRestrictionArea")
-                val rowArray = resultObject.getJSONArray("row")
 
-                for (i in 0 until rowArray.length()) {
-                    val row = rowArray.getJSONObject(i)
-                    val coords = row.getString("COORDINATES")
+                val response = jsonObject.getJSONObject("response")
+                val status = response.getString("status")
+                if (status != "OK") {
+                    Toast.makeText(this@GisActivity, "API 요청 실패: $status", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                val featureCollection = response.getJSONObject("result").getJSONObject("featureCollection")
+                val features = featureCollection.getJSONArray("features")
+
+                for (i in 0 until features.length()) {
+                    val feature = features.getJSONObject(i)
+                    val geometry = feature.getJSONObject("geometry")
+                    val coordinates = geometry.getJSONArray("coordinates")
 
                     val polygonOptions = PolygonOptions()
-                    val coordPairs = coords.split(",")
+                    val outerBoundary = coordinates.getJSONArray(0).getJSONArray(0)
 
-                    for (coord in coordPairs) {
-                        val latLng = coord.split(" ")
-                        if (latLng.size == 2) {
-                            val lat = latLng[0].toDoubleOrNull() ?: continue
-                            val lon = latLng[1].toDoubleOrNull() ?: continue
-                            polygonOptions.add(LatLng(lat, lon))
-                        }
+                    for (j in 0 until outerBoundary.length()) {
+                        val point = outerBoundary.getJSONArray(j)
+                        val lon = point.getDouble(0)
+                        val lat = point.getDouble(1)
+                        polygonOptions.add(LatLng(lat, lon))
                     }
+
+
                     polygonOptions.fillColor(0x55FF0000)  // 반투명 빨간색
                     polygonOptions.strokeColor(0xFFFF0000.toInt())  // 빨간색 테두리
                     polygonOptions.strokeWidth(3f)  // 선 굵기
