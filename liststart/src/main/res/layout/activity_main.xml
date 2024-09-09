@@ -66,7 +66,8 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:background="@drawable/rounded_top_conners"
-        android:padding="16dp"
+        android:paddingVertical="16dp"
+        android:paddingHorizontal="4dp"
         android:layout_marginTop="20dp">
 
         <!-- 추가/삭제 버튼 -->
@@ -87,7 +88,7 @@
                 android:src="@drawable/ic_plus"
                 android:scaleType="fitCenter"
                 android:contentDescription="Add"
-                app:tint="@color/black"
+                app:tint="@color/doosan_blue_dark"
                 />
 
             <ImageButton
@@ -97,7 +98,7 @@
                 android:scaleType="fitCenter"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_trash_fill"
-                app:tint="@color/black"
+                app:tint="@color/doosan_blue_dark"
                 android:contentDescription="Delete"
                 android:layout_marginStart="16dp"
                 android:padding="4dp"/>
@@ -110,7 +111,7 @@
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:paddingLeft="20dp"
-            android:paddingTop="20dp"
+            android:paddingTop="10dp"
             android:paddingRight="20dp"
             android:paddingBottom="16dp" />
 
