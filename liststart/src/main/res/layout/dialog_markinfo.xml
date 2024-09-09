@@ -43,6 +43,22 @@
                         android:textStyle="bold"
                         android:paddingBottom="4dp"/>
 
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        >
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/name_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:hint="홍길동"
+                            />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+
                     <EditText
                         android:id="@+id/edit_code_name"
                         android:layout_width="match_parent"
@@ -141,7 +157,7 @@
         android:id="@+id/tv_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="취소하기"
+        android:text="지정하기"
         android:textColor="#000000"
     android:padding="8dp"
     android:clickable="true"

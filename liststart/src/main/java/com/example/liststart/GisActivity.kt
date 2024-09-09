@@ -1,5 +1,6 @@
 package com.example.liststart
 
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -11,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -276,8 +278,10 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         if (marker != null) {
             markersList.add(marker)
         }
+        return marker ?: throw IllegalStateException("Marker could not be added")
 
     }
+
 
     override fun onConnected(p0: Bundle?) {
         val lat = intent.getDoubleExtra("lat", 0.0)
@@ -363,7 +367,7 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
     private fun loadDevelopmentRestrictedAreas() {
         // 여기서 원래 사용하고 있던 API의 URL을 설정합니다.
         val apiKey = "05C26CB0-9905-39AC-8E59-423EE652CA06"  // 사용자의 API 키 입력
-        val url = "https://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_UD801&key=$apiKey&geomFilter=BOX($long,$lat,${long + 1},${lat + 1})&format=json&size=100"
+        val url = "https://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_UD801&key=$apiKey&geomFilter=BOX(${long - 1},${lat - 1},${long + 1},${lat + 1})&format=json&size=100"
 
         DownloadTask().execute(url)
 

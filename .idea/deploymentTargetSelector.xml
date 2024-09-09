@@ -4,21 +4,19 @@
     <selectionStates>
       <SelectionState runConfigName="liststart">
         <option name="selectionMode" value="DROPDOWN" />
-
-        <DropdownSelection timestamp="2024-09-09T06:10:39.449774300Z">
+        <DropdownSelection timestamp="2024-09-09T08:07:29.584745700Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\bsm\.android\avd\Pixel_3a_API_35.avd" />
-
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jin\.android\avd\Pixel_3_API_35.avd" />
             </handle>
           </Target>
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="ch19_map">
+      <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="app">
+      <SelectionState runConfigName="ch19_map">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
