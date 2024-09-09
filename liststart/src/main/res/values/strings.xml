@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">liststart</string>
 
+    <string name="item_profile">Profile Image</string>
     <string name="title_default">이름 없음</string>
     <string name="search_hint">사업체 검색</string>
     <string name="dialog_title">사업 추가</string>

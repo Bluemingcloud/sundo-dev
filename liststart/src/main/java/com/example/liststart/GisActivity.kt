@@ -1,15 +1,16 @@
 package com.example.liststart
 
-import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
+
 import android.view.LayoutInflater
 import android.view.MotionEvent
+
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -51,6 +52,7 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
     private lateinit var centerEditText: EditText // 제목 수정용 EditText
     private lateinit var rightButton: ImageButton // 수정 적용 버튼
     private lateinit var leftButton: ImageButton // GPS 위치로 이동 버튼
+    private var markersList: MutableList<Marker> = mutableListOf() // 추가된 마커들을 관리할 리스트
 
     private var polygonList: MutableList<Polygon> = mutableListOf()
     private var isRestrictedAreaVisible = false // 규제구역 표시 여부
@@ -59,6 +61,51 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
 
     private lateinit var apiClient: GoogleApiClient
     private lateinit var providerClient: com.google.android.gms.location.FusedLocationProviderClient
+
+
+    // 규제구역 내에 있는지 확인하는 함수
+    private fun isLocationInRestrictedArea(lat: Double, long: Double): Boolean {
+        for (polygon in polygonList) {
+            val polygonBounds = polygon.points
+            val point = LatLng(lat, long)
+
+            // 주어진 좌표가 폴리곤 내에 있는지 확인
+            if (containsLocation(point, polygonBounds)) {
+                return true
+            }
+        }
+        return false
+    }
+    // LatLng가 폴리곤 안에 있는지 확인하는 함수
+    private fun containsLocation(point: LatLng, polygon: List<LatLng>): Boolean {
+        var intersectCount = 0
+        for (j in polygon.indices) {
+            val vertex1 = polygon[j]
+            val vertex2 = polygon[(j + 1) % polygon.size]
+            if (rayCastIntersect(point, vertex1, vertex2)) {
+                intersectCount++
+            }
+        }
+        return (intersectCount % 2 == 1) // 홀수이면 폴리곤 안에 있음
+    }
+
+    // ray-casting 알고리즘 사용하여 포인트가 폴리곤 내부에 있는지 확인
+    private fun rayCastIntersect(point: LatLng, vertex1: LatLng, vertex2: LatLng): Boolean {
+        val pointLat = point.latitude
+        val pointLng = point.longitude
+        val vertex1Lat = vertex1.latitude
+        val vertex1Lng = vertex1.longitude
+        val vertex2Lat = vertex2.latitude
+        val vertex2Lng = vertex2.longitude
+
+        if ((vertex1Lng > pointLng) != (vertex2Lng > pointLng)) {
+            val intersectLat = (vertex2Lat - vertex1Lat) * (pointLng - vertex1Lng) / (vertex2Lng - vertex1Lng) + vertex1Lat
+            if (pointLat < intersectLat) {
+                return true
+            }
+        }
+        return false
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -222,14 +269,21 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
             .position(latLng)
             .title(title)
             .icon(BitmapDescriptorFactory.defaultMarker(markerColor)) // 기본 마커 색상 설정
-        return googleMap?.addMarker(markerOption) ?: throw Exception("Marker could not be added")
+
+        val marker = googleMap?.addMarker(markerOption)
+
+        // 마커가 추가되면 리스트에 저장
+        if (marker != null) {
+            markersList.add(marker)
+        }
+
     }
 
     override fun onConnected(p0: Bundle?) {
         val lat = intent.getDoubleExtra("lat", 0.0)
         val long = intent.getDoubleExtra("long", 0.0)
 
-        if (lat == 0.0 && long == 0.0) {
+        if (lat == 0.0 && long == 0.0 || (lat == 91.0 || long == 181.0)) {
             moveToCurrentLocation()
         } else {
             moveMap(lat, long)
@@ -243,6 +297,7 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
     override fun onConnectionFailed(connectionResult: ConnectionResult) {
         Toast.makeText(this, "Google API 연결 실패: ${connectionResult.errorMessage}", Toast.LENGTH_LONG).show()
     }
+
 
     // 터치 이벤트 처리 (EditText 외부 터치 시 키보드 숨김)
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
@@ -302,12 +357,27 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         }
     }
 
+
+    // 규제구역 로드 함수 수정: 마커 위치를 확인하고 규제구역 내에 있는 마커는 삭제
+
     private fun loadDevelopmentRestrictedAreas() {
         // 여기서 원래 사용하고 있던 API의 URL을 설정합니다.
         val apiKey = "05C26CB0-9905-39AC-8E59-423EE652CA06"  // 사용자의 API 키 입력
         val url = "https://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_UD801&key=$apiKey&geomFilter=BOX($long,$lat,${long + 1},${lat + 1})&format=json&size=100"
 
         DownloadTask().execute(url)
+
+        // 규제구역 로드 후, 마커 검사 및 제거
+        for (marker in markersList) {
+            val markerPosition = marker.position
+            if (isLocationInRestrictedArea(markerPosition.latitude, markerPosition.longitude)) {
+                marker.remove() // 마커 제거
+                Toast.makeText(this, "마커가 규제구역 내에 있어 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // 리스트에서 제거된 마커들 갱신
+        markersList.removeAll { isLocationInRestrictedArea(it.position.latitude, it.position.longitude) }
     }
 
     private fun hideRestrictedAreas() {
@@ -355,6 +425,10 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
                 val featureCollection = response.getJSONObject("result").getJSONObject("featureCollection")
                 val features = featureCollection.getJSONArray("features")
 
+                // 기존 폴리곤 삭제
+                hideRestrictedAreas()
+
+                // 새로 로드된 폴리곤 추가
                 for (i in 0 until features.length()) {
                     val feature = features.getJSONObject(i)
                     val geometry = feature.getJSONObject("geometry")
@@ -370,63 +444,37 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
                         polygonOptions.add(LatLng(lat, lon))
                     }
 
-                    polygonOptions.fillColor(0x55FF0000)  // 반투명 빨간색
-                    polygonOptions.strokeColor(0xFFFF0000.toInt())  // 빨간색 테두리
-                    polygonOptions.strokeWidth(3f)  // 선 굵기
+                    polygonOptions.fillColor(0x7FFF0000)  // 규제구역 색상 및 투명도
+                    polygonOptions.strokeColor(Color.RED)
+                    polygonOptions.strokeWidth(2f)
 
                     val polygon = googleMap?.addPolygon(polygonOptions)
-
-                    if (polygon != null) {
-                        polygonList.add(polygon)
-                    }
+                    polygon?.let { polygonList.add(it) }
                 }
+
+                // 새로 로드된 규제구역을 기준으로 마커 삭제
+                removeMarkersInRestrictedAreas()
 
                 isRestrictedAreaVisible = true
             }
         }
     }
 
-    private fun isLocationInRestrictedArea(lat: Double, long: Double): Boolean {
-        for (polygon in polygonList) {
-            val polygonBounds = polygon.points
-            val point = LatLng(lat, long)
 
-            // 주어진 좌표가 폴리곤 내에 있는지 확인
-            if (containsLocation(point, polygonBounds)) {
-                return true
-            }
+    // 규제구역 내의 마커를 제거하는 함수
+    private fun removeMarkersInRestrictedAreas() {
+        val markersToRemove = markersList.filter { marker ->
+            val markerPosition = marker.position
+            isLocationInRestrictedArea(markerPosition.latitude, markerPosition.longitude)
         }
-        return false
-    }
 
-    // LatLng가 폴리곤 안에 있는지 확인하는 함수
-    private fun containsLocation(point: LatLng, polygon: List<LatLng>): Boolean {
-        var intersectCount = 0
-        for (j in polygon.indices) {
-            val vertex1 = polygon[j]
-            val vertex2 = polygon[(j + 1) % polygon.size]
-            if (rayCastIntersect(point, vertex1, vertex2)) {
-                intersectCount++
-            }
+        markersToRemove.forEach { marker ->
+            marker.remove()
+            Toast.makeText(this, "마커가 규제구역 내에 있어 삭제되었습니다.", Toast.LENGTH_SHORT).show()
         }
-        return (intersectCount % 2 == 1) // 홀수이면 폴리곤 안에 있음
-    }
 
-    // ray-casting 알고리즘 사용하여 포인트가 폴리곤 내부에 있는지 확인
-    private fun rayCastIntersect(point: LatLng, vertex1: LatLng, vertex2: LatLng): Boolean {
-        val pointLat = point.latitude
-        val pointLng = point.longitude
-        val vertex1Lat = vertex1.latitude
-        val vertex1Lng = vertex1.longitude
-        val vertex2Lat = vertex2.latitude
-        val vertex2Lng = vertex2.longitude
+        // 리스트에서 제거된 마커들 갱신
+        markersList.removeAll(markersToRemove)
 
-        if ((vertex1Lng > pointLng) != (vertex2Lng > pointLng)) {
-            val intersectLat = (vertex2Lat - vertex1Lat) * (pointLng - vertex1Lng) / (vertex2Lng - vertex1Lng) + vertex1Lat
-            if (pointLat < intersectLat) {
-                return true
-            }
-        }
-        return false
     }
 }

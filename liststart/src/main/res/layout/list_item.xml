@@ -1,28 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingVertical="8dp"
+    android:layout_height="60dp"
+    android:paddingVertical="10dp"
     android:paddingHorizontal="20dp"
     android:background="@drawable/list_item_background"
-    android:layout_margin="8dp"
-    android:gravity="center_vertical">
+    android:layout_margin="8dp">
 
     <!-- 프로필 이미지 -->
     <ImageView
         android:id="@+id/profileImage"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
         android:src="@drawable/profile"
-        android:contentDescription="Profile Image"
-        android:layout_marginEnd="16dp"/>
+        android:contentDescription="@string/item_profile"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="3dp"
+        android:layout_alignParentStart="true"
+        />
 
     <!-- 텍스트 레이아웃 -->
     <LinearLayout
+        android:id="@+id/textLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_toEndOf="@+id/profileImage">
         <!-- 제목 -->
         <TextView
             android:id="@+id/titleText"
@@ -31,7 +36,7 @@
             android:text="가산 풍력디지털 단지"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#000000"/>
+            android:textColor="#000000" />
         <!-- 날짜 -->
         <TextView
             android:id="@+id/dateText"
@@ -39,6 +44,20 @@
             android:layout_height="wrap_content"
             android:text="2024.09.05"
             android:textSize="14sp"
-            android:textColor="#808080"/>
+            android:textColor="#808080" />
     </LinearLayout>
-</LinearLayout>
+
+    <ImageButton
+        android:id="@+id/checkBoxImageButton"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_checkbox"
+        android:scaleType="fitCenter"
+        app:tint="@color/black"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        android:visibility="gone"
+        />
+</RelativeLayout>
