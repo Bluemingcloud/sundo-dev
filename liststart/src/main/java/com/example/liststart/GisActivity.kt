@@ -6,14 +6,20 @@ import android.location.Location
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
+
+import android.view.LayoutInflater
+import android.view.MotionEvent
+
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TabHost
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.gms.common.ConnectionResult
@@ -55,6 +61,7 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
 
     private lateinit var apiClient: GoogleApiClient
     private lateinit var providerClient: com.google.android.gms.location.FusedLocationProviderClient
+
 
     // 규제구역 내에 있는지 확인하는 함수
     private fun isLocationInRestrictedArea(lat: Double, long: Double): Boolean {
@@ -173,7 +180,6 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
             selectLocationTextView.visibility = if (isMarkerPreviewVisible) View.VISIBLE else View.GONE
         }
 
-
         // '지정하기' 버튼 클릭 이벤트 설정
         val selectLocationButton = findViewById<TextView>(R.id.selectLocationTextView)
         selectLocationButton.setOnClickListener {
@@ -185,8 +191,14 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
                     Toast.makeText(this, "규제구역입니다. 마커를 추가할 수 없습니다.", Toast.LENGTH_SHORT).show()
                 } else {
                     // 중심 좌표에 마커 추가
-                    addMarkerAtLocation(currentCenter.latitude, currentCenter.longitude, "선택된 위치")
+                    val marker = addMarkerAtLocation(currentCenter.latitude, currentCenter.longitude, "선택된 위치")
                     Toast.makeText(this, "마커가 추가되었습니다: ${currentCenter.latitude}, ${currentCenter.longitude}", Toast.LENGTH_SHORT).show()
+
+                    // 마커 클릭 시 다이얼로그 호출
+                    googleMap?.setOnMarkerClickListener {
+                        showCustomDialog(it)
+                        true
+                    }
                 }
             } else {
                 Toast.makeText(this, "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
@@ -206,7 +218,6 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
             moveToCurrentLocation()
         }
     }
-
 
     override fun onMapReady(map: GoogleMap?) {
         googleMap = map
@@ -252,18 +263,20 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
     }
 
-    private fun addMarkerAtLocation(latitude: Double, longitude: Double, title: String, markerColor: Float = BitmapDescriptorFactory.HUE_RED) {
+    private fun addMarkerAtLocation(latitude: Double, longitude: Double, title: String, markerColor: Float = BitmapDescriptorFactory.HUE_RED): Marker {
         val latLng = LatLng(latitude, longitude)
         val markerOption = MarkerOptions()
             .position(latLng)
             .title(title)
             .icon(BitmapDescriptorFactory.defaultMarker(markerColor)) // 기본 마커 색상 설정
+
         val marker = googleMap?.addMarker(markerOption)
 
         // 마커가 추가되면 리스트에 저장
         if (marker != null) {
             markersList.add(marker)
         }
+
     }
 
     override fun onConnected(p0: Bundle?) {
@@ -285,7 +298,68 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         Toast.makeText(this, "Google API 연결 실패: ${connectionResult.errorMessage}", Toast.LENGTH_LONG).show()
     }
 
+
+    // 터치 이벤트 처리 (EditText 외부 터치 시 키보드 숨김)
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        if (ev?.action == MotionEvent.ACTION_DOWN) {
+            val v = currentFocus
+            if (v is EditText) {
+                val outRect = android.graphics.Rect()
+                v.getGlobalVisibleRect(outRect)
+                if (!outRect.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
+                    v.clearFocus()
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(v.windowToken, 0)
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun showCustomDialog(marker: Marker) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_markinfo, null)
+
+        // 위도, 경도 설정
+        val latitudeEditText = dialogView.findViewById<EditText>(R.id.edit_latitude)
+        val longitudeEditText = dialogView.findViewById<EditText>(R.id.edit_longitude)
+
+        latitudeEditText.setText(marker.position.latitude.toString())
+        longitudeEditText.setText(marker.position.longitude.toString())
+
+        // TabHost 설정
+        val tabHost = dialogView.findViewById<TabHost>(R.id.tabHost)
+        tabHost.setup()
+
+        val spec1 = tabHost.newTabSpec("Model").setIndicator("모델 지정").setContent(R.id.tab1)
+        tabHost.addTab(spec1)
+
+        val spec2 = tabHost.newTabSpec("Coordinates").setIndicator("좌표 지정").setContent(R.id.tab2)
+        tabHost.addTab(spec2)
+
+        // 다이얼로그 빌더 생성
+        val dialogBuilder = AlertDialog.Builder(this)
+        dialogBuilder.setView(dialogView)
+            .setCancelable(true)
+
+        val alertDialog = dialogBuilder.create()
+        alertDialog.show()
+
+        // 취소하기 클릭 이벤트
+        dialogView.findViewById<TextView>(R.id.tv_cancel).setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+        // 삭제하기 클릭 이벤트
+        dialogView.findViewById<TextView>(R.id.tv_delete).setOnClickListener {
+            marker.remove() // 마커 삭제
+            Toast.makeText(this, "마커가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            alertDialog.dismiss()
+        }
+    }
+
+
     // 규제구역 로드 함수 수정: 마커 위치를 확인하고 규제구역 내에 있는 마커는 삭제
+
     private fun loadDevelopmentRestrictedAreas() {
         // 여기서 원래 사용하고 있던 API의 URL을 설정합니다.
         val apiKey = "05C26CB0-9905-39AC-8E59-423EE652CA06"  // 사용자의 API 키 입력
@@ -385,6 +459,8 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
             }
         }
     }
+
+
     // 규제구역 내의 마커를 제거하는 함수
     private fun removeMarkersInRestrictedAreas() {
         val markersToRemove = markersList.filter { marker ->
@@ -399,5 +475,6 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
 
         // 리스트에서 제거된 마커들 갱신
         markersList.removeAll(markersToRemove)
+
     }
 }
