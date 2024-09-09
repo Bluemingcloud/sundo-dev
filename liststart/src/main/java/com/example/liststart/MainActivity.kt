@@ -1,5 +1,6 @@
 package com.example.liststart
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -8,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
@@ -20,14 +22,14 @@ const val TAG = "myLog"
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var recyclerView: RecyclerView
     private lateinit var itemList: MutableList<Item>
+    private lateinit var itemAdapter: ItemAdapter
+    private var isVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-// 리사이클러뷰 설정
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this) 
 
         // 예시 데이터 생성 및 어댑터 설정
         val exampleList = mutableListOf(
@@ -41,7 +43,15 @@ class MainActivity : AppCompatActivity() {
 
         itemList = exampleList
 
-        recyclerView.adapter = ItemAdapter(itemList) { item -> handleClick(item) }
+        // RecyclerView 설정
+        recyclerView = findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // itemAdapter 초기화
+        itemAdapter = ItemAdapter(itemList, isVisible) { item -> handleClick(item) }
+
+        // RecyclerView에 어댑터 설정
+        recyclerView.adapter = itemAdapter
 
         // 검색 버튼 클릭 리스너
         val searchButton = findViewById<ImageButton>(R.id.searchButton)
@@ -56,17 +66,26 @@ class MainActivity : AppCompatActivity() {
             handleAddBtnClick()
         }
 
-        // EditText 포커스 상태에 따른 밑줄 색상 변경
-        val searchEditText = findViewById<EditText>(R.id.searchEditText)
-        searchEditText.setOnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                // 포커스가 활성화 되면 밑줄 색상 변경
-                searchEditText.backgroundTintList = ContextCompat.getColorStateList(this, R.color.black)
-            } else {
-                // 포커스가 비활성화 되면 밑줄 색상 변경
-                searchEditText.backgroundTintList = ContextCompat.getColorStateList(this, R.color.white)
-            }
+        // 버튼 클릭 시 체크박스 보이기
+        val deleteButton = findViewById<ImageButton>(R.id.deleteButton) // 삭제버튼 버튼
+        deleteButton.setOnClickListener {
+            toggleCheckBoxVisibility()
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun toggleCheckBoxVisibility() {
+        isVisible = !isVisible
+        // 쓰레기통 이미지 버튼을 다른 모양으로 변경
+        val deleteButton = findViewById<ImageButton>(R.id.deleteButton)
+        if (isVisible) {
+            deleteButton.setImageResource(R.drawable.ic_check) // 새로운 이미지로 변경
+        } else {
+            deleteButton.setImageResource(R.drawable.ic_trash_fill) // 원래 이미지로 복원
+        }
+
+        // 리사이클러뷰 갱신
+        itemAdapter.updateVisibility(isVisible) // updateVisibility 함수 호출하여 갱신
     }
 
     private fun handleClick(data: Item) {
@@ -78,6 +97,10 @@ class MainActivity : AppCompatActivity() {
         bundle.putDouble("long", data.long)
         intent.putExtras(bundle)
         startActivity(intent)
+    }
+
+    private fun handleClickDeleteCheckbox() {
+
     }
 
     private fun handleAddBtnClick() {
@@ -96,8 +119,13 @@ class MainActivity : AppCompatActivity() {
 
         dialogBinding.dialogConfirm.setOnClickListener { // 추가하기
             val title = dialogBinding.addEditText.text.toString()
-            addItem(title, "2024.09.05")
-            customDialog.dismiss()
+
+            if (title.isBlank()) {
+                dialogBinding.addEditText.error = "Title cannot be empty"
+            } else {
+                addItem(title, "2024.09.05")
+                customDialog.dismiss()
+            }
         }
 
         customDialog.show() //보이기
@@ -131,7 +159,6 @@ class MainActivity : AppCompatActivity() {
     private fun addItem(title: String, date: String) {
         val item = Item(title, date)
         itemList.add(item)
+        itemAdapter.notifyItemInserted(itemList.size - 1) // 마지막에 아이템 추가
     }
-
-
 }
