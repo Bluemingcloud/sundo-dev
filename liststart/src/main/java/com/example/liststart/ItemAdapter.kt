@@ -15,6 +15,8 @@ class ItemAdapter(
     private val func: (data: Item) -> Unit
 ) : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
 
+    private var originalItemList: MutableList<Item> = itemList.toMutableList() // 원본 리스트
+
     // ViewHolder 클래스
     class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
@@ -81,6 +83,16 @@ class ItemAdapter(
     fun addItem(data: Item) {
         itemList.add(data)
         notifyItemInserted(itemList.size - 1)
+    }
+
+    // 검색 기능 구현
+    fun filterItem(target: String) {
+        itemList = if (target.isBlank()) {
+            originalItemList.toMutableList() // 검색어가 없을 경우 원본 리스트 복원
+        } else {
+            originalItemList.filter { it.title.contains(target, ignoreCase = true) }.toMutableList() // 검색 결과
+        }
+        notifyDataSetChanged()
     }
 }
 

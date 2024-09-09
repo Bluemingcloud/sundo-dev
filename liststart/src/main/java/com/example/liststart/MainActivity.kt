@@ -7,8 +7,11 @@ import android.content.Intent
 import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.WindowManager
+import android.widget.EditText
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -53,9 +56,21 @@ class MainActivity : AppCompatActivity() {
         // 검색 버튼 클릭 리스너
         val searchButton = findViewById<ImageButton>(R.id.searchButton)
         searchButton.setOnClickListener {
-            val intent = Intent(this, GisActivity::class.java)
-            startActivity(intent)
+            val target = findViewById<EditText>(R.id.searchEditText).text.toString()
+            itemAdapter.filterItem(target)
         }
+
+        // 검색어 입력시 자동 필터링
+        val searchEditText = findViewById<EditText>(R.id.searchEditText)
+        searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val query = s.toString()
+                itemAdapter.filterItem(query) // 검색어에 맞는 아이템 필터링
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
 
         // 추가 버튼 클릭 리스너
         val addButton = findViewById<ImageButton>(R.id.addButton)
@@ -66,12 +81,8 @@ class MainActivity : AppCompatActivity() {
         // 삭제 버튼 클릭 시 체크박스가 보이면 삭제, 아니면 체크박스 표시
         val deleteButton = findViewById<ImageButton>(R.id.deleteButton)
         deleteButton.setOnClickListener {
-            if (isVisible) {
-                itemAdapter.deleteCheckedItems() // 체크된 항목 삭제
-                toggleCheckBoxVisibility()
-            } else {
-                toggleCheckBoxVisibility() // 체크박스 보이게 하기
-            }
+            if (isVisible) itemAdapter.deleteCheckedItems() // 체크된 항목 삭제
+            toggleCheckBoxVisibility()
         }
     }
 
