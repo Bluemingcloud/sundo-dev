@@ -263,7 +263,7 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         val lat = intent.getDoubleExtra("lat", 0.0)
         val long = intent.getDoubleExtra("long", 0.0)
 
-        if (lat == 0.0 && long == 0.0) {
+        if (lat == 0.0 && long == 0.0 || (lat == 91.0 || long == 181.0)) {
             moveToCurrentLocation()
         } else {
             moveMap(lat, long)
