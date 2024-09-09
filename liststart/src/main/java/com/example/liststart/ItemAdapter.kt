@@ -8,9 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 // 데이터 클래스 정의 (예시)
 
-
 class ItemAdapter(private val itemList: List<Item> , private val func: (data: Item) -> Unit) : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
-
     // ViewHolder 클래스
     class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 

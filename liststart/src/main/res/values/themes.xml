@@ -6,7 +6,16 @@
 <!--        <item name="android:statusBarColor">@android:color/transparent</item>-->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
-</style>
+    </style>
 
     <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />
+
+    <style name="CustomDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@drawable/dialog_background</item> <!-- 둥근 모서리 배경 -->
+        <item name="android:windowMinWidthMajor">90%</item> <!-- 너비를 90%로 설정 -->
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:backgroundDimEnabled">true</item> <!-- 배경을 어둡게 -->
+    </style>
+
+
 </resources>

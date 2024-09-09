@@ -3,4 +3,8 @@
 
     <string name="title_default">이름 없음</string>
     <string name="search_hint">사업체 검색</string>
+    <string name="dialog_title">사업 추가</string>
+    <string name="add_hint">사업명을 입력하세요.</string>
+    <string name="dialog_cancel">취소하기</string>
+    <string name="dialog_confirm">추가하기</string>
 </resources>

@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="doosan_blue">#005EB8</color>
     <color name="gray">#E2E2E2</color>
+    <color name="darkgray">#777777</color>
 </resources>
