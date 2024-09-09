@@ -64,7 +64,4 @@ class MainActivity : AppCompatActivity() {
         intent.putExtras(bundle)
         startActivity(intent)
     }
-
-
-
 }

@@ -68,7 +68,7 @@
 
     <!-- Button on top of the Map -->
     <ImageButton
-        android:id="@+id/controlLine"
+        android:id="@+id/controllLine"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignParentStart="true"

@@ -18,9 +18,8 @@
 
         <meta-data android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>
-        <activity
-            android:name=".GisActivity"
-            android:exported="false" />
+        <activity android:name=".GisActivity"
+                  android:exported="false" />
         <!-- MainActivity 등록 -->
         <activity
             android:name=".MainActivity"
