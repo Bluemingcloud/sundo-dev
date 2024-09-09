@@ -6,6 +6,7 @@ import android.location.Location
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -13,9 +14,11 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TabHost
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.gms.common.ConnectionResult
@@ -27,6 +30,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
@@ -55,48 +59,6 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
 
     private lateinit var apiClient: GoogleApiClient
     private lateinit var providerClient: com.google.android.gms.location.FusedLocationProviderClient
-
-    private fun isLocationInRestrictedArea(lat: Double, long: Double): Boolean {
-        for (polygon in polygonList) {
-            val polygonBounds = polygon.points
-            val point = LatLng(lat, long)
-
-            // 주어진 좌표가 폴리곤 내에 있는지 확인
-            if (containsLocation(point, polygonBounds)) {
-                return true
-            }
-        }
-        return false
-    }
-    // LatLng가 폴리곤 안에 있는지 확인하는 함수
-    private fun containsLocation(point: LatLng, polygon: List<LatLng>): Boolean {
-        var intersectCount = 0
-        for (j in polygon.indices) {
-            val vertex1 = polygon[j]
-            val vertex2 = polygon[(j + 1) % polygon.size]
-            if (rayCastIntersect(point, vertex1, vertex2)) {
-                intersectCount++
-            }
-        }
-        return (intersectCount % 2 == 1) // 홀수이면 폴리곤 안에 있음
-    }
-    // ray-casting 알고리즘 사용하여 포인트가 폴리곤 내부에 있는지 확인
-    private fun rayCastIntersect(point: LatLng, vertex1: LatLng, vertex2: LatLng): Boolean {
-        val pointLat = point.latitude
-        val pointLng = point.longitude
-        val vertex1Lat = vertex1.latitude
-        val vertex1Lng = vertex1.longitude
-        val vertex2Lat = vertex2.latitude
-        val vertex2Lng = vertex2.longitude
-
-        if ((vertex1Lng > pointLng) != (vertex2Lng > pointLng)) {
-            val intersectLat = (vertex2Lat - vertex1Lat) * (pointLng - vertex1Lng) / (vertex2Lng - vertex1Lng) + vertex1Lat
-            if (pointLat < intersectLat) {
-                return true
-            }
-        }
-        return false
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -171,7 +133,6 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
             selectLocationTextView.visibility = if (isMarkerPreviewVisible) View.VISIBLE else View.GONE
         }
 
-
         // '지정하기' 버튼 클릭 이벤트 설정
         val selectLocationButton = findViewById<TextView>(R.id.selectLocationTextView)
         selectLocationButton.setOnClickListener {
@@ -183,8 +144,14 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
                     Toast.makeText(this, "규제구역입니다. 마커를 추가할 수 없습니다.", Toast.LENGTH_SHORT).show()
                 } else {
                     // 중심 좌표에 마커 추가
-                    addMarkerAtLocation(currentCenter.latitude, currentCenter.longitude, "선택된 위치")
+                    val marker = addMarkerAtLocation(currentCenter.latitude, currentCenter.longitude, "선택된 위치")
                     Toast.makeText(this, "마커가 추가되었습니다: ${currentCenter.latitude}, ${currentCenter.longitude}", Toast.LENGTH_SHORT).show()
+
+                    // 마커 클릭 시 다이얼로그 호출
+                    googleMap?.setOnMarkerClickListener {
+                        showCustomDialog(it)
+                        true
+                    }
                 }
             } else {
                 Toast.makeText(this, "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
@@ -204,7 +171,6 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
             moveToCurrentLocation()
         }
     }
-
 
     override fun onMapReady(map: GoogleMap?) {
         googleMap = map
@@ -250,13 +216,13 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
     }
 
-    private fun addMarkerAtLocation(latitude: Double, longitude: Double, title: String, markerColor: Float = BitmapDescriptorFactory.HUE_RED) {
+    private fun addMarkerAtLocation(latitude: Double, longitude: Double, title: String, markerColor: Float = BitmapDescriptorFactory.HUE_RED): Marker {
         val latLng = LatLng(latitude, longitude)
         val markerOption = MarkerOptions()
             .position(latLng)
             .title(title)
             .icon(BitmapDescriptorFactory.defaultMarker(markerColor)) // 기본 마커 색상 설정
-        googleMap?.addMarker(markerOption)
+        return googleMap?.addMarker(markerOption) ?: throw Exception("Marker could not be added")
     }
 
     override fun onConnected(p0: Bundle?) {
@@ -293,6 +259,47 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
             }
         }
         return super.dispatchTouchEvent(ev)
+    }
+
+    private fun showCustomDialog(marker: Marker) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_markinfo, null)
+
+        // 위도, 경도 설정
+        val latitudeEditText = dialogView.findViewById<EditText>(R.id.edit_latitude)
+        val longitudeEditText = dialogView.findViewById<EditText>(R.id.edit_longitude)
+
+        latitudeEditText.setText(marker.position.latitude.toString())
+        longitudeEditText.setText(marker.position.longitude.toString())
+
+        // TabHost 설정
+        val tabHost = dialogView.findViewById<TabHost>(R.id.tabHost)
+        tabHost.setup()
+
+        val spec1 = tabHost.newTabSpec("Model").setIndicator("모델 지정").setContent(R.id.tab1)
+        tabHost.addTab(spec1)
+
+        val spec2 = tabHost.newTabSpec("Coordinates").setIndicator("좌표 지정").setContent(R.id.tab2)
+        tabHost.addTab(spec2)
+
+        // 다이얼로그 빌더 생성
+        val dialogBuilder = AlertDialog.Builder(this)
+        dialogBuilder.setView(dialogView)
+            .setCancelable(true)
+
+        val alertDialog = dialogBuilder.create()
+        alertDialog.show()
+
+        // 취소하기 클릭 이벤트
+        dialogView.findViewById<TextView>(R.id.tv_cancel).setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+        // 삭제하기 클릭 이벤트
+        dialogView.findViewById<TextView>(R.id.tv_delete).setOnClickListener {
+            marker.remove() // 마커 삭제
+            Toast.makeText(this, "마커가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            alertDialog.dismiss()
+        }
     }
 
     private fun loadDevelopmentRestrictedAreas() {
@@ -377,5 +384,49 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
                 isRestrictedAreaVisible = true
             }
         }
+    }
+
+    private fun isLocationInRestrictedArea(lat: Double, long: Double): Boolean {
+        for (polygon in polygonList) {
+            val polygonBounds = polygon.points
+            val point = LatLng(lat, long)
+
+            // 주어진 좌표가 폴리곤 내에 있는지 확인
+            if (containsLocation(point, polygonBounds)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    // LatLng가 폴리곤 안에 있는지 확인하는 함수
+    private fun containsLocation(point: LatLng, polygon: List<LatLng>): Boolean {
+        var intersectCount = 0
+        for (j in polygon.indices) {
+            val vertex1 = polygon[j]
+            val vertex2 = polygon[(j + 1) % polygon.size]
+            if (rayCastIntersect(point, vertex1, vertex2)) {
+                intersectCount++
+            }
+        }
+        return (intersectCount % 2 == 1) // 홀수이면 폴리곤 안에 있음
+    }
+
+    // ray-casting 알고리즘 사용하여 포인트가 폴리곤 내부에 있는지 확인
+    private fun rayCastIntersect(point: LatLng, vertex1: LatLng, vertex2: LatLng): Boolean {
+        val pointLat = point.latitude
+        val pointLng = point.longitude
+        val vertex1Lat = vertex1.latitude
+        val vertex1Lng = vertex1.longitude
+        val vertex2Lat = vertex2.latitude
+        val vertex2Lng = vertex2.longitude
+
+        if ((vertex1Lng > pointLng) != (vertex2Lng > pointLng)) {
+            val intersectLat = (vertex2Lat - vertex1Lat) * (pointLng - vertex1Lng) / (vertex2Lng - vertex1Lng) + vertex1Lat
+            if (pointLat < intersectLat) {
+                return true
+            }
+        }
+        return false
     }
 }
