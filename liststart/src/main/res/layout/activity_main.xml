@@ -104,16 +104,37 @@
                 android:padding="4dp"/>
         </LinearLayout>
 
-        <!-- RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingLeft="20dp"
-            android:paddingTop="10dp"
-            android:paddingRight="20dp"
-            android:paddingBottom="16dp" />
+            android:layout_height="match_parent">
+            <!-- RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingLeft="20dp"
+                android:paddingTop="10dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="16dp" />
+            <!-- 상단 그라데이션 -->
+            <View
+                android:id="@+id/topFadeOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:layout_gravity="top"
+                android:background="@drawable/fade_gradient_top"
+                android:visibility="gone"/>
+
+            <!-- 하단 그라데이션 -->
+            <View
+                android:id="@+id/bottomFadeOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/fade_gradient_bottom"
+                android:visibility="visible"/>
+        </FrameLayout>
 
     </LinearLayout>
 

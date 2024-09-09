@@ -40,9 +40,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val rootLayout = findViewById<LinearLayout>(R.id.rootLayout)
+        val topFadeOverlay: View = findViewById(R.id.topFadeOverlay)
+        val bottomFadeOverlay: View = findViewById(R.id.bottomFadeOverlay)
 
         // 예시 데이터 생성 및 어댑터 설정
         val exampleList = mutableListOf(
+            Item("가산 풍력디지털 단지", "2024.09.05", R.drawable.profile, 37.479180, 126.874852),
+            Item("송파구 법조타운", "2024.09.01", R.drawable.profile, 37.483817, 127.112121),
+            Item("영등포 스마트 도시", "2024.08.30", R.drawable.profile, 37.529931, 126.887700),
+            Item("선도 디지털 단지", "2024.08.30", R.drawable.profile, 37.480417, 126.874323),
+            Item("제주 탐라 풍력 단지", "2024.08.30", R.drawable.profile, 33.499911, 126.449403),
+            Item("영흥 풍력 단지", "2024.08.30", R.drawable.profile, 37.239810, 126.446187),
             Item("가산 풍력디지털 단지", "2024.09.05", R.drawable.profile, 37.479180, 126.874852),
             Item("송파구 법조타운", "2024.09.01", R.drawable.profile, 37.483817, 127.112121),
             Item("영등포 스마트 도시", "2024.08.30", R.drawable.profile, 37.529931, 126.887700),
@@ -62,6 +70,24 @@ class MainActivity : AppCompatActivity() {
 
         // RecyclerView에 어댑터 설정
         recyclerView.adapter = itemAdapter
+
+        // 스크롤 리스너 추가
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                // 스크롤 오프셋을 계산하여 투명도 조절
+                val scrollOffset = recyclerView.computeVerticalScrollOffset()
+
+                if (scrollOffset > 0) {
+                    topFadeOverlay.visibility = View.VISIBLE
+                    topFadeOverlay.alpha = 1f
+                    bottomFadeOverlay.alpha = 1f
+                } else {
+                    topFadeOverlay.visibility = View.GONE
+                }
+            }
+        })
 
         // 검색 버튼 클릭 리스너
         val searchButton = findViewById<ImageButton>(R.id.searchButton)
