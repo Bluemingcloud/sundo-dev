@@ -38,19 +38,20 @@
             />
 
         <!-- Center TextView -->
-        <TextView
-            android:id="@+id/centerTextView"
-            android:layout_width='250dp'
+        <EditText
+            android:id="@+id/centerEditText"
+            android:layout_width="250dp"
             android:layout_height="40dp"
             android:layout_centerInParent="true"
-            android:text="@string/title_default"
-            android:textAlignment="center"
-            android:textSize="16sp"
-            android:textColor="#007AFF"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:background="@drawable/textname"
-            />
+            android:hint="@string/title_default"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textColor="#007AFF"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="@drawable/textname"
+        android:inputType="text"
+        />
 
         <!-- Right Button -->
         <ImageButton
