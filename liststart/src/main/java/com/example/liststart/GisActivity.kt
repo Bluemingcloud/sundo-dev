@@ -1,6 +1,7 @@
 package com.example.liststart
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -114,12 +115,12 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         return false
     }
 
-    
-    
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gis)
-        
+
         // 인텐트로 전달된 제목 데이터 받기
         title = intent?.getStringExtra("title") ?: "이름 없음"
 
@@ -227,8 +228,16 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         leftButton.setOnClickListener {
             moveToCurrentLocation()
         }
+
+        //AR camera
+        val cameraBtn = findViewById<LinearLayout>(R.id.cameraBtn)
+        cameraBtn.setOnClickListener{
+            val intent = Intent(this, com.unity3d.player.UnityPlayerActivity::class.java)
+            intent.putExtra("unity", "some_value")  // 여기에 문자열 값을 명시적으로 전달
+            startActivity(intent)
+        }
     }
-//현용
+    //현용
     override fun onMapReady(map: GoogleMap?) {
         googleMap = map
 
@@ -276,30 +285,30 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         val latLng = LatLng(latitude, longitude)
         googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
     }
-//현용
-private fun addMarkerAtLocation(
-    latitude: Double,
-    longitude: Double,
-    title: String = "사업지명 $markerCounter",
-    markerColor: Float = BitmapDescriptorFactory.HUE_RED
-): Marker {
-    val latLng = LatLng(latitude, longitude)
-    val markerOption = MarkerOptions()
-        .position(latLng)
-        .title(title)  // 마커 제목 설정
-        .icon(BitmapDescriptorFactory.defaultMarker(markerColor))
+    //현용
+    private fun addMarkerAtLocation(
+        latitude: Double,
+        longitude: Double,
+        title: String = "사업지명 $markerCounter",
+        markerColor: Float = BitmapDescriptorFactory.HUE_RED
+    ): Marker {
+        val latLng = LatLng(latitude, longitude)
+        val markerOption = MarkerOptions()
+            .position(latLng)
+            .title(title)  // 마커 제목 설정
+            .icon(BitmapDescriptorFactory.defaultMarker(markerColor))
 
-    val marker = googleMap?.addMarker(markerOption)
+        val marker = googleMap?.addMarker(markerOption)
 
-    // 마커가 성공적으로 추가되면 리스트에 저장하고 카운터를 증가시킵니다.
-    if (marker != null) {
-        markersList.add(marker)
-        markerCounter++ // 마커 추가 후 카운터 증가
-        marker.showInfoWindow() // InfoWindow를 바로 표시
+        // 마커가 성공적으로 추가되면 리스트에 저장하고 카운터를 증가시킵니다.
+        if (marker != null) {
+            markersList.add(marker)
+            markerCounter++ // 마커 추가 후 카운터 증가
+            marker.showInfoWindow() // InfoWindow를 바로 표시
+        }
+
+        return marker ?: throw IllegalStateException("Marker could not be added")
     }
-
-    return marker ?: throw IllegalStateException("Marker could not be added")
-}
 
 
     class CustomInfoWindowAdapter(private val context: Context) : GoogleMap.InfoWindowAdapter {

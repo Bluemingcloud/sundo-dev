@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
+    kotlin("kapt")
 }
 
 android {
@@ -50,4 +51,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.google.android.gms:play-services:12.0.1")
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.glide)
+    kapt(libs.glideCompiler)
+    implementation(project(":unityLibrary"))
 }

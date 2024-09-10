@@ -1,15 +1,64 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Android Studio 관련 .gitignore
+
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+.gradle/
+.idea/
 local.properties
+.gradle/
+captures/
+.externalNativeBuild/
+.navigation/
+build/
+app/build/
+
+# Gradle files
+.gradle/
+build/
+gradle-app.setting/
+app/build/
+!gradle-wrapper.jar
+
+# Android Studio specific files
+.idea/workspace.xml
+.idea/libraries
+.idea/modules.xml
+.idea/.name
+.idea/caches
+.idea/assetWizardSettings.xml
+.idea/libraries
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/jsLibraryMappings.xml
+
+# Keystore files
+*.jks
+*.keystore
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild
+
+# Android profiler
+**/captures/
+.traces
+
+# NDK
+obj/
+
+# Exclude UnityLibrary from Android Studio project
+/unityLibrary/
