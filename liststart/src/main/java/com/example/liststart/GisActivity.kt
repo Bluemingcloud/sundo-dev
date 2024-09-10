@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
@@ -348,8 +349,8 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         val alertDialog = dialogBuilder.create()
         alertDialog.show()
 
-        // 취소하기 클릭 이벤트
-        dialogView.findViewById<TextView>(R.id.tv_cancel).setOnClickListener {
+        // 지정하기 클릭 이벤트
+        dialogView.findViewById<TextView>(R.id.tv_target).setOnClickListener {
             alertDialog.dismiss()
         }
 
