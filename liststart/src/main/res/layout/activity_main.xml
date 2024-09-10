@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -26,7 +27,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="10dp"
-        android:paddingHorizontal="50dp">
+        android:paddingHorizontal="50dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
         <EditText
             android:id="@+id/searchEditText"
@@ -63,7 +66,8 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:background="@drawable/rounded_top_conners"
-        android:padding="16dp"
+        android:paddingVertical="16dp"
+        android:paddingHorizontal="4dp"
         android:layout_marginTop="20dp">
 
         <!-- 추가/삭제 버튼 -->
@@ -84,7 +88,7 @@
                 android:src="@drawable/ic_plus"
                 android:scaleType="fitCenter"
                 android:contentDescription="Add"
-                app:tint="@color/black"
+                app:tint="@color/doosan_blue_dark"
                 />
 
             <ImageButton
@@ -94,22 +98,43 @@
                 android:scaleType="fitCenter"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_trash_fill"
-                app:tint="@color/black"
+                app:tint="@color/doosan_blue_dark"
                 android:contentDescription="Delete"
                 android:layout_marginStart="16dp"
                 android:padding="4dp"/>
         </LinearLayout>
 
-        <!-- RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingLeft="20dp"
-            android:paddingTop="20dp"
-            android:paddingRight="20dp"
-            android:paddingBottom="16dp" />
+            android:layout_height="match_parent">
+            <!-- RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingLeft="20dp"
+                android:paddingTop="10dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="16dp" />
+            <!-- 상단 그라데이션 -->
+            <View
+                android:id="@+id/topFadeOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:layout_gravity="top"
+                android:background="@drawable/fade_gradient_top"
+                android:visibility="gone"/>
+
+            <!-- 하단 그라데이션 -->
+            <View
+                android:id="@+id/bottomFadeOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/fade_gradient_bottom"
+                android:visibility="visible"/>
+        </FrameLayout>
 
     </LinearLayout>
 
