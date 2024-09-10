@@ -16,6 +16,11 @@
         <item name="android:windowMinWidthMinor">90%</item>
         <item name="android:backgroundDimEnabled">true</item> <!-- 배경을 어둡게 -->
     </style>
+    <style name="CustomDialogTheme1" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@drawable/dialog_background</item> <!-- 둥근 모서리 배경 -->
+
+        <item name="android:backgroundDimEnabled">true</item> <!-- 배경을 어둡게 -->
+    </style>
 
 
 </resources>

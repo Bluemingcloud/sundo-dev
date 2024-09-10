@@ -1,11 +1,11 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@drawable/rounded_border"> <!-- 다이얼로그 모서리 둥글게 -->
+    android:padding="16dp">
 
+    <!-- TabHost 설정 -->
     <TabHost
         android:id="@+id/tabHost"
         android:layout_width="match_parent"
@@ -39,63 +39,60 @@
                         android:id="@+id/title_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textStyle="bold"
-                        android:paddingBottom="4dp"/>
-
-<!--                    <com.google.android.material.textfield.TextInputLayout-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content">-->
-
-<!--                        <com.google.android.material.textfield.TextInputEditText-->
-<!--                            android:id="@+id/name_text"-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:inputType="text"-->
-<!--                            -->
-<!--                            />-->
-<!--                    </com.google.android.material.textfield.TextInputLayout>-->
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
                         android:text="모델 지정"
                         android:textStyle="bold"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="4dp"/>
+                        android:textSize="18sp"
+                        android:paddingBottom="4dp"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center"/>
+
 
                     <!-- 모델 선택 Spinner -->
                     <Spinner
                         android:id="@+id/spinner_model"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/rounded_border" /> <!-- 둥근 테두리 -->
+                        android:layout_marginTop="10dp"
+                        />
 
-                    <!-- 선택된 모델을 나타내는 이미지 -->
+<!--                        android:background="@drawable/border"-->
+                         <!-- Border 추가 -->
+
+                    <!-- 선택된 모델 이미지 -->
                     <ImageView
                         android:id="@+id/model_image"
                         android:layout_width="match_parent"
                         android:layout_height="150dp"
                         android:scaleType="centerCrop"
-                        android:background="@drawable/rounded_border"
-                        android:layout_marginTop="10dp"/>
+                        android:layout_marginTop="10dp" />
 
-                    <TextView
+                    <!-- 방향 각도 레이아웃 -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="방향 각도"
-                        android:textStyle="bold"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="4dp"/>
+                        android:orientation="horizontal"
+                        android:layout_marginTop="10dp"
+                        android:gravity="center_vertical">
 
-                    <EditText
-                        android:id="@+id/edit_angle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="0"
-                        android:inputType="number"
-                        android:background="@drawable/rounded_border" /> <!-- 둥근 테두리 -->
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="방향 각도"
+                            android:textStyle="bold"
+                            android:gravity="start" />
 
+                        <EditText
+                            android:id="@+id/edit_angle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:inputType="number"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:gravity="center" />
+                    </LinearLayout>
                 </LinearLayout>
 
                 <!-- 좌표 지정 탭 -->
@@ -105,87 +102,242 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- 기존 위도, 경도 입력 -->
-                    <TextView
+                    <!-- 위도 경도 입력란 -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="위도"
-                        android:textStyle="bold"
-                        android:paddingBottom="4dp"/>
+                        android:orientation="horizontal"
+                        android:weightSum="3">
 
-                    <EditText
-                        android:id="@+id/edit_latitude"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="127.3948209384"
-                        android:background="@drawable/rounded_border" /> <!-- 둥근 테두리 -->
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="위도"
+                            android:textStyle="bold"
+                            android:gravity="start"
+                            android:paddingStart="16dp"
+                            android:paddingBottom="8dp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="경도"
-                        android:textStyle="bold"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="4dp"/>
-
-                    <EditText
-                        android:id="@+id/edit_longitude"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="58.32094781980237"
-                        android:background="@drawable/rounded_border" /> <!-- 둥근 테두리 -->
-
-                    <!-- 도분초 및 방향 입력 추가 -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="도분초 및 방향 입력"
-                        android:textStyle="bold"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="4dp"/>
+                        <EditText
+                            android:id="@+id/edit_latitude"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:hint=""
+                            android:gravity="center" />
+                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="3">
 
-                        <!-- 도 (Degrees) 입력 -->
-                        <EditText
-                            android:id="@+id/degrees"
+                        <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:hint="Degrees"/>
+                            android:layout_weight="1"
+                            android:text="경도"
+                            android:textStyle="bold"
+                            android:gravity="start"
+                            android:paddingStart="16dp"
+                            android:paddingBottom="8dp" />
 
-                        <!-- 분 (Minutes) 입력 -->
                         <EditText
-                            android:id="@+id/minutes"
+                            android:id="@+id/edit_longitude"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:hint="Minutes"/>
-
-                        <!-- 초 (Seconds) 입력 -->
-                        <EditText
-                            android:id="@+id/seconds"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:hint="Seconds"/>
-
-                        <!-- 방향 (Direction) 입력 -->
-                        <EditText
-                            android:id="@+id/direction"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:hint="Direction"/>
+                            android:layout_weight="2"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:hint=""
+                            android:gravity="center" />
                     </LinearLayout>
+
+                    <!-- 구분선 -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#D3D3D3"
+                        android:layout_marginVertical="16dp" />
+
+                    <!-- 도분초 및 방향 입력란 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="3">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Degrees"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:paddingStart="16dp" />
+
+                        <EditText
+                            android:id="@+id/degrees_lat"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:hint=""
+                            android:gravity="center" />
+
+                        <EditText
+                            android:id="@+id/degrees_long"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:hint=""
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="3"
+                        android:layout_marginTop="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Minutes"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:paddingStart="16dp" />
+
+                        <EditText
+                            android:id="@+id/minutes_lat"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:hint=""
+                            android:gravity="center" />
+
+                        <EditText
+                            android:id="@+id/minutes_long"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:hint=""
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="3"
+                        android:layout_marginTop="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Seconds"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:paddingStart="16dp" />
+
+                        <EditText
+                            android:id="@+id/seconds_lat"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:hint=""
+                            android:gravity="center" />
+
+                        <EditText
+                            android:id="@+id/seconds_long"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:hint=""
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="3"
+                        android:layout_marginTop="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Directions"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:paddingStart="16dp" />
+
+                        <EditText
+                            android:id="@+id/direction_lat"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="text"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:hint=""
+                            android:gravity="center" />
+
+                        <EditText
+                            android:id="@+id/direction_long"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="text"
+                            android:background="@drawable/border"
+                            android:padding="8dp"
+                            android:textSize="14sp"
+                            android:hint=""
+                            android:gravity="center" />
+                    </LinearLayout>
+
                 </LinearLayout>
             </FrameLayout>
         </LinearLayout>
     </TabHost>
 
+    <!-- 저장하기 및 삭제하기 버튼 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -200,7 +352,7 @@
             android:clickable="true"
             android:focusable="true"
             android:padding="8dp"
-            android:text="지정하기"
+            android:text="저장하기"
             android:textColor="#000000" />
 
         <TextView
@@ -214,4 +366,5 @@
             android:text="삭제하기"
             android:textColor="#000000" />
     </LinearLayout>
+
 </LinearLayout>
