@@ -14,10 +14,13 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TabHost
 import android.widget.TextView
 import android.widget.Toast
@@ -57,7 +60,8 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
     private lateinit var leftButton: ImageButton // GPS 위치로 이동 버튼
     private var markersList: MutableList<Marker> = mutableListOf() // 추가된 마커들을 관리할 리스트
     private var markerCounter = 1 //마커 카운트
-
+    private var titleCounter: String = ""
+    private var title: String = "이름 없음"
     private var polygonList: MutableList<Polygon> = mutableListOf()
     private var isRestrictedAreaVisible = false // 규제구역 표시 여부
     private var lat: Double = 0.0
@@ -115,7 +119,8 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         setContentView(R.layout.activity_gis)
 
         // 인텐트로 전달된 제목 데이터 받기
-        val title = intent.getStringExtra("title") ?: "이름 없음"
+        title = intent?.getStringExtra("title") ?: "이름 없음"
+
 
         // UI 요소 초기화
         centerEditText = findViewById(R.id.centerEditText)
@@ -194,9 +199,9 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
                     Toast.makeText(this, "규제구역입니다. 마커를 추가할 수 없습니다.", Toast.LENGTH_SHORT).show()
                 } else {
                     // 중심 좌표에 마커 추가
-                    val marker = addMarkerAtLocation(currentCenter.latitude, currentCenter.longitude, title+" "+markerCounter)
+                    val marker = addMarkerAtLocation(currentCenter.latitude, currentCenter.longitude, title + " " + markerCounter)
                     Toast.makeText(this, "마커가 추가되었습니다: ${currentCenter.latitude}, ${currentCenter.longitude}", Toast.LENGTH_SHORT).show()
-
+                    titleCounter = title + " " + markerCounter
                     // 마커 클릭 시 다이얼로그 호출
                     googleMap?.setOnMarkerClickListener {
                         showCustomDialog(it)
@@ -363,6 +368,40 @@ private fun addMarkerAtLocation(
         latitudeEditText.setText(marker.position.latitude.toString())
         longitudeEditText.setText(marker.position.longitude.toString())
 
+        // 동적으로 제목 설정 (title과 markerCounter 결합)
+        val titleTextView = dialogView.findViewById<TextView>(R.id.title_text)
+        titleTextView.text = "$titleCounter"  // 예: "가산 풍력 디지털 단지 2"
+        // 모델 지정 Spinner 설정
+        val modelSpinner = dialogView.findViewById<Spinner>(R.id.spinner_model)
+        val modelImageView = dialogView.findViewById<ImageView>(R.id.model_image)
+
+
+        // 모델 목록
+        val models = arrayOf("모델 1", "모델 2", "모델 3")
+        val modelDescriptions = arrayOf("모델 1 설명", "모델 2 설명", "모델 3 설명")
+        val modelImages = arrayOf(R.drawable.fan, R.drawable.fan, R.drawable.fan)
+
+        // Spinner 어댑터 설정
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, models)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        modelSpinner.adapter = adapter
+
+        // Spinner 선택 이벤트 처리
+        modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                // 모델에 해당하는 이미지 및 설명 설정
+                modelImageView.setImageResource(modelImages[position])
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // 선택되지 않았을 때 처리
+            }
+        }
         // TabHost 설정
         val tabHost = dialogView.findViewById<TabHost>(R.id.tabHost)
         tabHost.setup()
@@ -381,9 +420,25 @@ private fun addMarkerAtLocation(
         val alertDialog = dialogBuilder.create()
         alertDialog.show()
 
-        // 지정하기 클릭 이벤트
-        dialogView.findViewById<TextView>(R.id.tv_target).setOnClickListener {
-            alertDialog.dismiss()
+        // 저장하기 클릭 이벤트
+        dialogView.findViewById<TextView>(R.id.tv_target).apply {
+            text = "저장하기" // 버튼 텍스트를 '저장하기'로 변경
+            setOnClickListener {
+                // 사용자가 입력한 새로운 위도와 경도 값을 가져옵니다.
+                val newLatitude = latitudeEditText.text.toString().toDoubleOrNull()
+                val newLongitude = longitudeEditText.text.toString().toDoubleOrNull()
+
+                if (newLatitude != null && newLongitude != null) {
+                    // 새 위치로 마커 위치 업데이트
+                    marker.position = LatLng(newLatitude, newLongitude)
+                    marker.title = "업데이트된 위치" // 필요한 경우, 제목도 업데이트
+                    marker.showInfoWindow() // InfoWindow 업데이트
+                    Toast.makeText(this@GisActivity, "마커 위치가 업데이트되었습니다.", Toast.LENGTH_SHORT).show()
+                    alertDialog.dismiss()
+                } else {
+                    Toast.makeText(this@GisActivity, "올바른 위도와 경도를 입력하세요.", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         // 삭제하기 클릭 이벤트
