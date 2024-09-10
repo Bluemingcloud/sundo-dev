@@ -1,6 +1,5 @@
 package com.example.liststart
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -9,8 +8,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -18,19 +15,15 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.liststart.databinding.CustomDialogBinding
 import com.example.liststart.databinding.DeleteDialogBinding
 
-const val TAG = "myLog"
-
 class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var itemList: MutableList<Item>
     private lateinit var itemAdapter: ItemAdapter
     private var isVisible = false
     private lateinit var searchEditText: EditText // 검색 editText
@@ -43,8 +36,11 @@ class MainActivity : AppCompatActivity() {
         val topFadeOverlay: View = findViewById(R.id.topFadeOverlay)
         val bottomFadeOverlay: View = findViewById(R.id.bottomFadeOverlay)
 
-        // 예시 데이터 생성 및 어댑터 설정
-        val exampleList = mutableListOf(
+        // 전역 데이터를 관리하는 MyApplication 객체 가져오기
+        val app = application as MyApplication
+
+        // 예시 데이터
+        val exampleList = arrayListOf(
             Item("가산 풍력디지털 단지", "2024.09.05", R.drawable.profile, 37.479180, 126.874852),
             Item("송파구 법조타운", "2024.09.01", R.drawable.profile, 37.483817, 127.112121),
             Item("영등포 스마트 도시", "2024.08.30", R.drawable.profile, 37.529931, 126.887700),
@@ -59,14 +55,18 @@ class MainActivity : AppCompatActivity() {
             Item("영흥 풍력 단지", "2024.08.30", R.drawable.profile, 37.239810, 126.446187)
         )
 
-        itemList = exampleList
+        // 데이터 저장
+        app.setItemList(exampleList)
 
         // RecyclerView 설정
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         // itemAdapter 초기화
-        itemAdapter = ItemAdapter(itemList, isVisible, { item -> handleClick(item) })
+        itemAdapter = ItemAdapter(isVisible) { item -> handleClick(item) }
+
+        // MyApplication을 Adapter에 설정
+        itemAdapter.setApplicationContext(this)
 
         // RecyclerView에 어댑터 설정
         recyclerView.adapter = itemAdapter
@@ -92,8 +92,10 @@ class MainActivity : AppCompatActivity() {
         // 검색 버튼 클릭 리스너
         val searchButton = findViewById<ImageButton>(R.id.searchButton)
         searchButton.setOnClickListener {
-            val target = findViewById<EditText>(R.id.searchEditText).text.toString()
-            itemAdapter.filterItem(target)
+            val target = searchEditText.text.toString()
+            // MyApplication의 필터 메서드 사용
+            val filteredList = app.filterItem(target)
+            itemAdapter.notifyDataSetChanged() // 필터링 결과 적용 후 UI 갱신
         }
 
         // EditText 초기화
@@ -103,7 +105,8 @@ class MainActivity : AppCompatActivity() {
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val query = s.toString()
-                itemAdapter.filterItem(query) // 검색어에 맞는 아이템 필터링
+                val filteredList = app.filterItem(query) // 필터링된 리스트 가져오기
+                itemAdapter.setFilteredList(filteredList) // 필터링된 리스트를 어댑터에 전달
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -112,19 +115,11 @@ class MainActivity : AppCompatActivity() {
 
         setupUI(rootLayout)
 
-        // 검색 포커스 밖에서 키보드 숨김처리
+        // 검색 포커스 밖에서 키보드 숨김 처리
         searchEditText.setOnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
-                // 키보드 숨기기
-                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(v.windowToken, 0)
+                hideKeyboard()
             }
-        }
-
-        // 검색 버튼 클릭 시 포커스 해제 및 키보드 숨기기
-        searchButton.setOnClickListener {
-            searchEditText.clearFocus()
-            hideKeyboard()
         }
 
         // 추가 버튼 클릭 리스너
@@ -133,7 +128,7 @@ class MainActivity : AppCompatActivity() {
             handleAddBtnClick()
         }
 
-        // 삭제 버튼 클릭 시 체크박스가 보이면 삭제, 아니면 체크박스 표시
+        // 삭제 버튼 클릭 리스너
         val deleteButton = findViewById<ImageButton>(R.id.deleteButton)
         deleteButton.setOnClickListener {
             if (isVisible) {
@@ -151,7 +146,6 @@ class MainActivity : AppCompatActivity() {
 
     // 포커스 처리
     private fun setupUI(view: View) {
-        // EditText가 아닌 영역을 클릭하면 키보드를 숨기고 포커스를 해제합니다.
         if (view !is EditText) {
             view.setOnTouchListener { _, _ ->
                 hideKeyboard()
@@ -160,7 +154,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 이 뷰의 자식들에도 동일한 동작을 적용합니다.
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) {
                 val innerView = view.getChildAt(i)
@@ -179,12 +172,10 @@ class MainActivity : AppCompatActivity() {
             deleteButton.setImageResource(R.drawable.ic_trash_fill) // 원래 이미지로 복원
         }
 
-        // 리사이클러뷰 갱신
-        itemAdapter.updateVisibility(isVisible) // updateVisibility 함수 호출하여 갱신
+        itemAdapter.updateVisibility(isVisible)
     }
 
     private fun handleClick(data: Item) {
-        Log.d(TAG, ": 실행됨 ${data.title}")
         val intent = Intent(this, GisActivity::class.java)
         val bundle = Bundle()
         bundle.putString("title", data.title)
@@ -206,11 +197,12 @@ class MainActivity : AppCompatActivity() {
 
         dialogBinding.dialogConfirm.setOnClickListener {
             val title = dialogBinding.addEditText.text.toString()
-
             if (title.isBlank()) {
                 dialogBinding.addEditText.error = "Title cannot be empty"
             } else {
-                addItem(title, "2024.09.05")
+                val app = application as MyApplication
+                val newItem = Item(title, "2024.09.05")
+                itemAdapter.addItem(newItem) // 아이템 추가
                 customDialog.dismiss()
             }
         }
@@ -219,8 +211,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleDeleteBtnClick() {
-
-        if(itemAdapter.isAnyChecked()) {
+        if (itemAdapter.isAnyChecked()) {
             val deleteDialog = Dialog(this, R.style.CustomDialogTheme)
             val dialogBinding = DeleteDialogBinding.inflate(layoutInflater)
             dialogBinding.deleteItem.text = itemAdapter.getCheckedItemTitle()
@@ -239,12 +230,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             deleteDialog.show()
-        } else {
-            return
         }
-
     }
-
 
     private fun dialogResize(context: Context, dialog: Dialog, width: Float, height: Float = 0f) {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -261,10 +248,5 @@ class MainActivity : AppCompatActivity() {
             (size.x * width).toInt(),
             if (height != 0f) (size.y * height).toInt() else WindowManager.LayoutParams.WRAP_CONTENT
         )
-    }
-
-    private fun addItem(title: String, date: String) {
-        val item = Item(title, date)
-        itemAdapter.addItem(item)
     }
 }

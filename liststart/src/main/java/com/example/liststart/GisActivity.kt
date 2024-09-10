@@ -114,10 +114,12 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         return false
     }
 
+    
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gis)
-
+        
         // 인텐트로 전달된 제목 데이터 받기
         title = intent?.getStringExtra("title") ?: "이름 없음"
 
@@ -251,7 +253,6 @@ class GisActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Con
         }
 
     }
-    //현용
 
     private fun moveToCurrentLocation() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
