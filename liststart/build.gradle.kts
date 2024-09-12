@@ -54,5 +54,5 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation(libs.glide)
     kapt(libs.glideCompiler)
-    implementation(project(":unityLibrary"))
+    //implementation(project(":unityLibrary"))
 }
