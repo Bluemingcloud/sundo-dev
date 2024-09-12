@@ -24,3 +24,6 @@ include(":app")
 include(":ch19_map")
 include(":liststart")
 
+include(":unityLibrary")
+include(":unityLibrary:xrmanifest.androidlib")
+include(":launcher")
