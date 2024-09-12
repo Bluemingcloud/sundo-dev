@@ -31,15 +31,22 @@
         </activity>
 
 
-        <activity android:name=".GisActivity"
-            android:exported="false" />
-        <!-- MainActivity 등록 -->
+        <activity
+            android:name=".GisActivity"
+            android:exported="false"
+            android:launchMode="singleTask" />  <!-- GisActivity는 스택에서 새로 생성되지 않도록 설정 -->
+
+        <activity
+            android:name="com.unity3d.player.UnityPlayerActivity"
+            android:exported="true"
+            android:process=":unity"
+            android:launchMode="singleTask">
+        </activity>
+
         <activity
             android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
+            android:exported="true"
+            android:launchMode="singleTask" >
         </activity>
     </application>
 
