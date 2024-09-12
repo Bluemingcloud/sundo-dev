@@ -62,3 +62,4 @@ obj/
 
 # Exclude UnityLibrary from Android Studio project
 /unityLibrary/
+/launcher/
