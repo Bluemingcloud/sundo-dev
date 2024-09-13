@@ -1,23 +1,23 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-parcelize")
+    kotlin("kapt")
 }
 
 android {
-    namespace = "com.example.myapplication"
+    namespace = "com.example.liststart"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.myapplication"
+        applicationId = "com.example.liststart"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
         multiDexEnabled= true
-
     }
 
     buildTypes {
@@ -36,6 +36,8 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    viewBinding.isEnabled = true
 }
 
 dependencies {
@@ -48,6 +50,19 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.play.services)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.glide)
+    kapt(libs.glideCompiler)
+    implementation(project(":unityLibrary"))
 
-    implementation("com.google.android.gms:play-services:12.0.1")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.activity.ktx)
+
+    //test
+    testImplementation(libs.mockwebserver)
+    testImplementation(libs.junit)
 }

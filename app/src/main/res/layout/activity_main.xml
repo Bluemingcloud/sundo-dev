@@ -1,55 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="16dp"
+    android:background="@color/doosan_blue"
     tools:context=".MainActivity">
 
-    <ScrollView
+    <!-- 상단 이미지 로고 -->
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/ic_logo"
+        app:tint="@color/white"/>
+
+    <!-- 검색 바 및 버튼 -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:paddingHorizontal="50dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <EditText
+            android:id="@+id/searchEditText"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_weight="1"
+            android:hint="@string/search_hint"
+            android:backgroundTint="@color/white"
+            android:paddingVertical="20dp"
+            android:paddingHorizontal="15dp"
+            android:textColor="@color/white"
+            android:inputType="text"
+            android:textColorHint="@color/gray"
+            android:textSize="14sp"/>
 
-            <!-- 리스트 화면 -->
-            <ListView
-                android:id="@+id/list_view"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#eee" />
+        <ImageButton
+            android:id="@+id/searchButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="fitCenter"
+            android:padding="5dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_search_button"
+            android:contentDescription="Search"
+            android:layout_gravity="center_vertical"
+            app:tint="@color/white" />
+    </LinearLayout>
 
-            <!-- 입력 화면 -->
-            <LinearLayout
-                android:id="@+id/bottom_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="10dp">
 
-                <EditText
-                    android:id="@+id/todo_edit"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="10dp"/>
+    <LinearLayout
+        android:id="@+id/recyclerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_top_conners"
+        android:paddingVertical="16dp"
+        android:paddingHorizontal="4dp"
+        android:layout_marginTop="20dp">
 
-                <Button
-                    android:id="@+id/add_btn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="추가"
-                    android:textSize="25sp"/>
-            </LinearLayout>
+        <!-- 추가/삭제 버튼 -->
+        <LinearLayout
+            android:id="@+id/buttonLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="right"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="40dp">
 
+            <ImageButton
+                android:id="@+id/addButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_plus"
+                android:scaleType="fitCenter"
+                android:contentDescription="Add"
+                app:tint="@color/doosan_blue_dark"
+                />
+
+            <ImageButton
+                android:id="@+id/deleteButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:scaleType="fitCenter"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_trash_fill"
+                app:tint="@color/doosan_blue_dark"
+                android:contentDescription="Delete"
+                android:layout_marginStart="16dp"
+                android:padding="4dp"/>
         </LinearLayout>
-    </ScrollView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <!-- RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingLeft="20dp"
+                android:paddingTop="10dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="16dp" />
+            <!-- 상단 그라데이션 -->
+            <View
+                android:id="@+id/topFadeOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:layout_gravity="top"
+                android:background="@drawable/fade_gradient_top"
+                android:visibility="gone"/>
+
+            <!-- 하단 그라데이션 -->
+            <View
+                android:id="@+id/bottomFadeOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/fade_gradient_bottom"
+                android:visibility="visible"/>
+        </FrameLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

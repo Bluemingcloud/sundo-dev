@@ -11,6 +11,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -19,11 +20,8 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "My Application"
-include(":app")
-include(":ch19_map")
-include(":liststart")
+rootProject.name = "Turbine Insight"
 
+// 필요한 모듈만 포함
+include(":app")
 include(":unityLibrary")
-include(":unityLibrary:xrmanifest.androidlib")
-include(":launcher")

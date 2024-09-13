@@ -1,3 +1,19 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Turbine Insight</string>
+
+    <string name="item_profile">Profile Image</string>
+    <string name="title_default">이름 없음</string>
+    <string name="search_hint">사업체 검색</string>
+    <string name="dialog_title">사업 추가</string>
+    <string name="add_hint">사업명을 입력하세요.</string>
+    <string name="dialog_delete">선택된 사업을 삭제할까요?</string>
+    <string name="dialog_cancel">취소하기</string>
+    <string name="dialog_confirm_delete">삭제하기</string>
+    <string name="dialog_confirm">추가하기</string>
+    <string name="checkbox">체크박스</string>
+
+    <string name="test_title">가산 풍력디지털 단지</string>
+    <string name="test_date">2024.09.05</string>
+
+    <string name="splash_image_description">Splash screen GIF displaying the app logo</string>
 </resources>
